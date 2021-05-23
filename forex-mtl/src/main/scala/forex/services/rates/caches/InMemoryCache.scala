@@ -24,10 +24,7 @@ class InMemoryCache[F[_]: Applicative](ttl: FiniteDuration) extends Cache[F] {
   }
 
   def put(rates: List[Rate]): F[Unit] = {
-    val result: Unit = this.synchronized {
-      cache = Some((OffsetDateTime.now(), rates.map(rate => rate.pair -> rate).toMap))
-      ()
-    }
-    result.pure[F]
-  }
+    cache = Some((OffsetDateTime.now(), rates.map(rate => rate.pair -> rate).toMap))
+    ()
+  }.pure[F]
 }
