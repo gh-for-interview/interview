@@ -24,6 +24,10 @@ object Protocol {
       timestamp: Timestamp
   )
 
+  final case class GetApiError(
+      error: String
+  )
+
   implicit val currencyEncoder: Encoder[Currency] =
     Encoder.instance[Currency] { show.show _ andThen Json.fromString }
 
@@ -36,4 +40,6 @@ object Protocol {
   implicit val responseEncoder: Encoder[GetApiResponse] =
     deriveConfiguredEncoder[GetApiResponse]
 
+  implicit val errorEncoder: Encoder[GetApiError] =
+    deriveConfiguredEncoder[GetApiError]
 }

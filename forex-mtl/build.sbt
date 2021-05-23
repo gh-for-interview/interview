@@ -39,7 +39,7 @@ scalacOptions ++= Seq(
   "-Ywarn-unused:imports", // Warn if an import selector is not referenced.
   "-Ywarn-numeric-widen", // Warn when numerics are widened.
   "-Ywarn-unused:locals", // Warn if a local definition is unused.
-  "-Ywarn-unused:params", // Warn if a value parameter is unused.
+//  "-Ywarn-unused:params", // Warn if a value parameter is unused.
   "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates", // Warn if a private member is unused.
   "-Ycache-plugin-class-loader:last-modified", // Enables caching of classloaders for compiler plugins
@@ -56,6 +56,7 @@ libraryDependencies ++= Seq(
   Libraries.fs2,
   Libraries.http4sDsl,
   Libraries.http4sServer,
+  Libraries.http4sClient,
   Libraries.http4sCirce,
   Libraries.circeCore,
   Libraries.circeGeneric,
@@ -63,7 +64,13 @@ libraryDependencies ++= Seq(
   Libraries.circeParser,
   Libraries.pureConfig,
   Libraries.logback,
+  Libraries.redis4Cats,
   Libraries.scalaTest        % Test,
   Libraries.scalaCheck       % Test,
-  Libraries.catsScalaCheck   % Test
+  Libraries.catsScalaCheck   % Test,
+  Libraries.testContainers   % IntegrationTest
 )
+
+lazy val root = (project in file("."))
+  .configs(IntegrationTest)
+  .settings(Defaults.itSettings)

@@ -7,18 +7,20 @@ import forex.config._
 import fs2.Stream
 import org.http4s.server.blaze.BlazeServerBuilder
 
-object Main extends IOApp {
+trait Main extends IOApp {
+
+  self: ConfigProvider =>
 
   override def run(args: List[String]): IO[ExitCode] =
-    new Application[IO].stream(executionContext).compile.drain.as(ExitCode.Success)
+    new Application[IO](provide[IO]("app")).stream(executionContext).compile.drain.as(ExitCode.Success)
 
 }
 
-class Application[F[_]: ConcurrentEffect: Timer] {
+class Application[F[_]: ConcurrentEffect: ContextShift: Timer](configProvider: Stream[F, ApplicationConfig]) {
 
   def stream(ec: ExecutionContext): Stream[F, Unit] =
     for {
-      config <- Config.stream("app")
+      config <- configProvider
       module = new Module[F](config)
       _ <- BlazeServerBuilder[F](ec)
             .bindHttp(config.http.port, config.http.host)
@@ -27,3 +29,5 @@ class Application[F[_]: ConcurrentEffect: Timer] {
     } yield ()
 
 }
+
+object MainImpl extends Main with ConfigImpl
