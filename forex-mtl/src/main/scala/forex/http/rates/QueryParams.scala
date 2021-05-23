@@ -10,8 +10,8 @@ import scala.util.Try
 object QueryParams {
 
   private[http] implicit val currencyQueryParam: QueryParamDecoder[Currency] =
-    QueryParamDecoder[String].emap(c => Try(Currency.fromString(c)).toEither.leftMap(t => ParseFailure(t.getMessage, t.getMessage)))
-      //.map(Currency.fromString)
+    QueryParamDecoder[String]
+      .emap(c => Try(Currency.fromString(c)).toEither.leftMap(t => ParseFailure(t.getMessage, t.getMessage)))
 
   object FromQueryParam extends ValidatingQueryParamDecoderMatcher[Currency]("from")
   object ToQueryParam extends ValidatingQueryParamDecoderMatcher[Currency]("to")
