@@ -7,10 +7,11 @@ import forex.services._
 import forex.programs._
 import forex.services.rates.caches.Cache
 import org.http4s._
+import org.http4s.client.Client
 import org.http4s.implicits._
 import org.http4s.server.middleware.{AutoSlash, Timeout}
 
-class Module[F[_]: ConcurrentEffect: ContextShift: Timer](config: ApplicationConfig) {
+class Module[F[_]: ConcurrentEffect: ContextShift: Timer](config: ApplicationConfig, client: Client[F]) {
 
   private val ratesCacheService: Cache[F] = config.cache match {
     case "redis" => RatesServices.redisCache[F](config.redisUri, config.cacheTtl, config.internalTimeout)
@@ -19,7 +20,7 @@ class Module[F[_]: ConcurrentEffect: ContextShift: Timer](config: ApplicationCon
   }
 
   private val ratesService: RatesService[F] =
-    RatesServices.live[F](config.oneFrameUri, ratesCacheService, config.token, config.internalTimeout)
+    RatesServices.live[F](config.oneFrameUri, ratesCacheService, config.token, client)
 
   private val ratesProgram: RatesProgram[F] = RatesProgram[F](ratesService)
 

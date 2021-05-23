@@ -10,15 +10,13 @@ import forex.services.rates.Algebra
 import forex.services.rates.caches.Cache
 import forex.services.rates.errors.Error
 import org.http4s.{EntityDecoder, Header, Headers, Request, Response, Status, Uri}
-import org.http4s.client.blaze._
 import org.http4s.circe.jsonOf
 import forex.services.rates.errors.Error.OneFrameLookupFailed
+import org.http4s.client.Client
 
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class OneFrameLive[F[_]: ConcurrentEffect : Timer: Concurrent: ContextShift]
-(oneFrameUri: String, cache: Cache[F], token: String, timeout: FiniteDuration) extends Algebra[F] {
+(oneFrameUri: String, cache: Cache[F], token: String, client: Client[F]) extends Algebra[F] {
 
   import io.circe.generic.auto._
 
@@ -51,7 +49,6 @@ class OneFrameLive[F[_]: ConcurrentEffect : Timer: Concurrent: ContextShift]
       .flatMap(_.toRight[Error](OneFrameLookupFailed("Cant find rate in cache")).pure[F])
       .flatMap { eitherErrorOrPair =>
         if (eitherErrorOrPair.isLeft) {
-          BlazeClientBuilder[F](global).withRequestTimeout(timeout).resource.use { client =>
             val result = client.run(Request(uri = uri, headers = Headers.of(Header("token", token))))
               .use {
                 case r@Response(Status.Ok, _, _, _, _) => r.as[List[OneFrameApiResponse]].map(_.asRight[Error])
@@ -85,7 +82,6 @@ class OneFrameLive[F[_]: ConcurrentEffect : Timer: Concurrent: ContextShift]
                 }
               }.pure[F]
             } yield rate
-          }
       } else {
         eitherErrorOrPair.pure[F]
       }
