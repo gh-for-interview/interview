@@ -1,0 +1,15 @@
+version: "3.3"
+services:
+
+  one-frame:
+    image: paidyinc/one-frame
+    container_name: one-frame
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8080"
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "127.0.0.1:6379:6379"
